@@ -27,17 +27,37 @@ await dbContext.Database.MigrateAsync();
 
 var repository = new EfAdvertisementRepository(dbContext);
 
-driver.Navigate().GoToUrl(options.CategoryUrl);
-
 var listingPage = new OlxListingPage(driver);
 
-var listingUrls = listingPage.GetListingUrls();
+var listingUrls = new HashSet<string>();
 
-Console.WriteLine($"Found listings: {listingUrls.Count}");
+for (var pageNumber = 1; pageNumber <= options.PagesToParse; pageNumber++)
+{
+    var pageUrl = pageNumber == 1
+        ? options.CategoryUrl
+        : $"{options.CategoryUrl}?page={pageNumber}";
+
+    Console.WriteLine($"Opening listing page {pageNumber}: {pageUrl}");
+
+    driver.Navigate().GoToUrl(pageUrl);
+
+    var pageListingUrls = listingPage.GetListingUrls();
+
+    foreach (var listingUrl in pageListingUrls)
+    {
+        listingUrls.Add(listingUrl);
+    }
+
+    Console.WriteLine(
+        $"Page {pageNumber}: {pageListingUrls.Count} links"
+        );
+}
+
+Console.WriteLine($"Found unique listings: {listingUrls.Count}");
 
 var detailPage = new OlxDetailPage(driver);
 
-foreach (var url in listingUrls.Take(3))
+foreach (var url in listingUrls)
 {
     try
     {

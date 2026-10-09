@@ -7,4 +7,6 @@ public sealed class ParserOptions
 
     public string DatabasePath { get; init; } =
         "data/olx_ads.sqlite3";
+
+    public int PagesToParse { get; init; } = 10;
 }
