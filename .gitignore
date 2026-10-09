@@ -476,7 +476,9 @@ $RECYCLE.BIN/
 *.msp
 
 *.sqlite3
+*.sqlite3-*
 *.db
+data/
 
 # Windows shortcuts
 *.lnk

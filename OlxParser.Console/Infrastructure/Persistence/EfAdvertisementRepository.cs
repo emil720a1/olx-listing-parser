@@ -5,13 +5,13 @@ using OlxParser.Console.Domain;
 namespace OlxParser.Console.Infrastructure.Persistence;
 
 public sealed class EfAdvertisementRepository
-    :IAdvertisementRepository
+    : IAdvertisementRepository
 {
     private readonly OlxDbContext _dbContext;
 
-    public EfAdvertisementRepository(OlxDbContext dbcontext)
+    public EfAdvertisementRepository(OlxDbContext dbContext)
     {
-        _dbContext = dbcontext;
+        _dbContext = dbContext;
     }
 
     public async Task<bool> SaveAsync(

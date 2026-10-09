@@ -1,14 +1,24 @@
 ﻿using OlxParser.Console.Infrastructure.Selenium;
 using OlxParser.Console.Infrastructure.Selenium.Pages;
 using Microsoft.EntityFrameworkCore;
+using OlxParser.Console.Configuration;
 using OlxParser.Console.Infrastructure.Persistence;
 
-var driverFactory = new ChromeDriverFactory();
+var options = new ParserOptions();
+
+var databaseDirectory = Path.GetDirectoryName(options.DatabasePath);
+
+if (!string.IsNullOrWhiteSpace(databaseDirectory))
+{
+    Directory.CreateDirectory(databaseDirectory);
+}
+
+var driverFactory = new BrowserDriverFactory();
 
 using var driver = driverFactory.CreateDriver();
 
 var dbOptions = new DbContextOptionsBuilder<OlxDbContext>()
-    .UseSqlite("Data Source=OlxParser.Console/olx_ads.sqlite3")
+    .UseSqlite($"Data Source={options.DatabasePath}")
     .Options;
 
 await using var dbContext = new OlxDbContext(dbOptions);
@@ -17,9 +27,7 @@ await dbContext.Database.MigrateAsync();
 
 var repository = new EfAdvertisementRepository(dbContext);
 
-driver.Navigate().GoToUrl(
-    "https://www.olx.ua/uk/detskiy-mir/detskaya-odezhda/"
-);
+driver.Navigate().GoToUrl(options.CategoryUrl);
 
 var listingPage = new OlxListingPage(driver);
 
@@ -27,23 +35,28 @@ var listingUrls = listingPage.GetListingUrls();
 
 Console.WriteLine($"Found listings: {listingUrls.Count}");
 
-var firstUrl = listingUrls.First();
-
 var detailPage = new OlxDetailPage(driver);
 
-var advertisement = detailPage.Parse(firstUrl);
+foreach (var url in listingUrls.Take(3))
+{
+    try
+    {
+        Console.WriteLine($"Processing: {url}");
 
-var saved = await repository.SaveAsync(advertisement);
+        var advertisement = detailPage.Parse(url);
 
-Console.WriteLine(
-    saved
-        ? "Advertisement saved to database"
-        : "Advertisement already exists"
-);
+        var saved = await repository.SaveAsync(advertisement);
 
-Console.WriteLine($"Id: {advertisement.Id}");
-Console.WriteLine($"Title: {advertisement.Title}");
-Console.WriteLine($"Description: {advertisement.Description}");
-Console.WriteLine($"Url: {advertisement.Url}");
-Console.WriteLine($"Author: {advertisement.AuthorName}");
-Console.WriteLine($"Phone: {advertisement.Phone}");
+        Console.WriteLine(
+            saved
+                ? $"Saved: {advertisement.Id}"
+                : $"Already exists: {advertisement.Id}"
+        );
+    }
+    catch (Exception exception)
+    {
+        Console.WriteLine(
+            $"Failed to process {url}: {exception.Message}"
+        );
+    }
+}
