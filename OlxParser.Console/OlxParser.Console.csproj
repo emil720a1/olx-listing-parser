@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Selenium.WebDriver" Version="4.50.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Application\Interfaces\" />
+    <Folder Include="Application\Services\" />
+    <Folder Include="Configuration\" />
+    <Folder Include="Domain\" />
+    <Folder Include="Infrastructure\Persistence\" />
+  </ItemGroup>
+
+</Project>
