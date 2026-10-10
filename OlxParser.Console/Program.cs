@@ -61,6 +61,13 @@ var failedCount = 0;
 
 void RestartDriver()
 {
+    DisposeDriver();
+    driver = driverFactory.CreateDriver();
+    detailPage = new OlxDetailPage(driver);
+}
+
+void DisposeDriver()
+{
     try
     {
         driver.Quit();
@@ -71,8 +78,6 @@ void RestartDriver()
     }
 
     driver.Dispose();
-    driver = driverFactory.CreateDriver();
-    detailPage = new OlxDetailPage(driver);
 }
 
 try
@@ -129,8 +134,7 @@ try
 }
 finally
 {
-    driver.Quit();
-    driver.Dispose();
+    DisposeDriver();
 }
 
 Console.WriteLine(

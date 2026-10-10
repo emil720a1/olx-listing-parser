@@ -4,7 +4,6 @@ services:
       context: .
       dockerfile: Dockerfile
     image: olx-parser:test
-    container_name: olx-parser
     environment:
       DOTNET_RUNNING_IN_CONTAINER: "true"
       SELENIUM_REMOTE_URL: http://selenium:4444
@@ -16,7 +15,6 @@ services:
 
   selenium:
     image: selenium/standalone-chromium:latest
-    container_name: olx-parser-selenium
     shm_size: 2gb
     healthcheck:
       test: ["CMD-SHELL", "curl --fail http://localhost:4444/status || exit 1"]

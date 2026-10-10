@@ -1,5 +1,6 @@
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
+using OlxParser.Console.Application.Services;
 using OlxParser.Console.Domain;
 
 namespace OlxParser.Console.Infrastructure.Selenium.Pages;
@@ -83,7 +84,7 @@ public sealed class OlxDetailPage
 
         return new Advertisement
         {
-            Id = ExtractId(url),
+            Id = OlxListingIdExtractor.Extract(url),
             Title = title,
             Description = description,
             Url = url,
@@ -99,25 +100,6 @@ public sealed class OlxDetailPage
             element) as string;
 
         return text?.Trim() ?? string.Empty;
-    }
-
-    private static string ExtractId(string url)
-    {
-        var lastSegment = new Uri(url).Segments.Last().Trim('/');
-
-        var extensionIndex = lastSegment.IndexOf(".html");
-
-        if (extensionIndex >= 0)
-        {
-            lastSegment = lastSegment[..extensionIndex];
-        }
-
-        var separatorIndex = lastSegment.LastIndexOf("-");
-
-        return separatorIndex >= 0
-            ? lastSegment[(separatorIndex + 1)..]
-            : lastSegment;
-
     }
 
 }

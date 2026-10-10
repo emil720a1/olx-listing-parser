@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="OlxParser.Console.Tests/OlxParser.Console.Tests.csproj" />
   <Project Path="OlxParser.Console/OlxParser.Console.csproj" />
 </Solution>

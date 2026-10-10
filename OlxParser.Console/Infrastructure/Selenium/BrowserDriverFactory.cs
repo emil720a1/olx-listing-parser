@@ -17,11 +17,17 @@ public sealed class BrowserDriverFactory : IBrowserDriverFactory
             options.AddArgument("--headless=new");
             options.AddArgument("--no-sandbox");
             options.AddArgument("--disable-dev-shm-usage");
+            options.PageLoadStrategy = PageLoadStrategy.Eager;
 
-            return new OpenQA.Selenium.Remote.RemoteWebDriver(
+            var remoteDriver = new OpenQA.Selenium.Remote.RemoteWebDriver(
                 new Uri(remoteUrl),
                 options
             );
+
+            remoteDriver.Manage().Timeouts().PageLoad =
+                TimeSpan.FromSeconds(30);
+
+            return remoteDriver;
         }
 
         var isContainer =
