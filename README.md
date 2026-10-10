@@ -1,21 +1,21 @@
 # OLX Listing Parser
 
-Консольний парсер оголошень OLX на .NET 10. Проєкт відкриває сторінки категорії через Selenium, збирає посилання на оголошення, переходить на сторінки оголошень і зберігає дані в SQLite через Entity Framework Core.
+A .NET 10 console application that parses OLX listings using Selenium, collects listing details, and stores them in SQLite through Entity Framework Core.
 
-## Що збирає парсер
+## What the parser collects
 
-Для кожного оголошення зберігаються:
+For each listing, the parser stores:
 
-- `Id` — ідентифікатор оголошення OLX;
-- `Title` — назва оголошення;
-- `Description` — опис оголошення;
-- `Url` — посилання на оголошення;
-- `AuthorName` — ім'я продавця;
-- `Phone` — номер телефону, якщо він доступний на сторінці.
+- `Id` — the OLX listing identifier;
+- `Title` — the listing title;
+- `Description` — the listing description;
+- `Url` — the listing URL;
+- `AuthorName` — the seller name;
+- `Phone` — the phone number when it is available on the page.
 
-Парсер не створює дублікати: перед збереженням перевіряються `Id` і `Url`. При повторному запуску вже збережені оголошення оновлюються.
+The parser prevents duplicates by checking both `Id` and `Url`. On subsequent runs, existing listings are updated instead of being inserted again.
 
-## Технології
+## Technologies
 
 - .NET 10;
 - Selenium WebDriver;
@@ -24,9 +24,9 @@
 - SQLite;
 - Docker Compose.
 
-## Локальний запуск
+## Local run
 
-Потрібні встановлені .NET SDK 10 та Chrome/Chromium.
+The local run requires .NET SDK 10 and Chrome or Chromium.
 
 ```bash
 dotnet restore
@@ -34,52 +34,52 @@ dotnet build
 dotnet run --project OlxParser.Console
 ```
 
-SQLite-база створюється за шляхом:
+The SQLite database is created at:
 
 ```text
 data/olx_ads.sqlite3
 ```
 
-EF Core автоматично застосовує міграції під час запуску програми.
+Entity Framework Core migrations are applied automatically when the application starts.
 
-## Запуск через Docker Compose
+## Docker Compose
 
-Запустити парсер разом із Selenium:
+Start the parser and Selenium service:
 
 ```bash
 docker compose up --build
 ```
 
-Або запустити тільки одноразовий запуск парсера:
+Run the parser as a one-time job:
 
 ```bash
 docker compose run --rm olx-parser
 ```
 
-Подивитися логи:
+View parser logs:
 
 ```bash
 docker compose logs -f olx-parser
 ```
 
-Зупинити контейнери:
+Stop the services:
 
 ```bash
 docker compose down
 ```
 
-База зберігається на хості в `data/olx_ads.sqlite3`, тому дані не втрачаються після видалення контейнера.
+The database is mounted from the host at `data/olx_ads.sqlite3`, so it remains available after the containers are removed.
 
-## Перевірка бази
+## Inspecting the database
 
-Кількість оголошень:
+Count stored listings:
 
 ```bash
 sqlite3 data/olx_ads.sqlite3 \
   "SELECT COUNT(*) FROM advertisements;"
 ```
 
-Перегляд останніх записів:
+View the latest records:
 
 ```bash
 sqlite3 -header -column data/olx_ads.sqlite3 \
@@ -89,18 +89,18 @@ sqlite3 -header -column data/olx_ads.sqlite3 \
    LIMIT 10;"
 ```
 
-## Конфігурація
+## Configuration
 
-Основні параметри знаходяться у `OlxParser.Console/Configuration/ParserOptions.cs`:
+The main parser settings are located in `OlxParser.Console/Configuration/ParserOptions.cs`:
 
-- URL категорії;
-- шлях до SQLite-бази;
-- кількість сторінок для обробки.
+- category URL;
+- SQLite database path;
+- number of pages to parse.
 
-## Чому `Phone` може бути порожнім
+## Why `Phone` can be empty
 
-OLX не завжди показує номер телефону в HTML сторінки. Він може бути прихований, доступний лише після натискання кнопки або недоступний для конкретного оголошення. У такому випадку парсер зберігає `Phone = null`, а інші доступні поля оголошення все одно зберігаються.
+OLX does not always expose a phone number in the page HTML. The number may be hidden, available only after an interaction, or unavailable for a particular listing. In that case, the parser stores `Phone` as `null` while preserving the other available listing fields.
 
-## Обмеження
+## Limitations
 
-Структура HTML OLX може змінюватися. Якщо сайт змінить `data-testid` або інші селектори, відповідні селектори в Selenium-сторінках потрібно буде оновити.
+The OLX HTML structure may change over time. If OLX changes its `data-testid` attributes or other selectors, the corresponding Selenium page objects will need to be updated.
