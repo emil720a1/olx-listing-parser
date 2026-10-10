@@ -1,0 +1,9 @@
+.git
+.idea
+.vs
+**/bin
+**/obj
+data
+*.sqlite3
+*.sqlite3-*
+*.db
