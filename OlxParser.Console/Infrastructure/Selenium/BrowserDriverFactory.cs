@@ -9,7 +9,38 @@ public sealed class BrowserDriverFactory : IBrowserDriverFactory
     {
         var options = new ChromeOptions();
 
-        options.AddArgument("--start-maximized");
+        var remoteUrl =
+            Environment.GetEnvironmentVariable("SELENIUM_REMOTE_URL");
+
+        if (!string.IsNullOrWhiteSpace(remoteUrl))
+        {
+            options.AddArgument("--headless=new");
+            options.AddArgument("--no-sandbox");
+            options.AddArgument("--disable-dev-shm-usage");
+
+            return new OpenQA.Selenium.Remote.RemoteWebDriver(
+                new Uri(remoteUrl),
+                options
+            );
+        }
+
+        var isContainer =
+            string.Equals(
+                Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"),
+                "true",
+                StringComparison.OrdinalIgnoreCase);
+
+        if (isContainer)
+        {
+            options.AddArgument("--headless");
+            options.AddArgument("--no-sandbox");
+            options.AddArgument("--disable-dev-shm-usage");
+        }
+        else
+        {
+            options.AddArgument("--start-maximized");
+        }
+
         options.PageLoadStrategy = PageLoadStrategy.Eager;
 
         var driver = new ChromeDriver(options);

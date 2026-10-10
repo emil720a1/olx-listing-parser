@@ -4,13 +4,13 @@ public sealed class Advertisement
 {
     public required string Id { get; init; }
 
-    public required string Title { get; init; }
+    public required string Title { get; set; }
 
-    public string? Description { get; init; }
+    public string? Description { get; set; }
 
     public required string Url { get; init; }
 
-    public string? AuthorName { get; init; }
+    public string? AuthorName { get; set; }
 
-    public string? Phone { get; init; }
+    public string? Phone { get; set; }
 }

@@ -30,12 +30,49 @@ public sealed class OlxDetailPage
             By.CssSelector("[data-testid='offer_title']")
         ).Text.Trim();
 
-        var description = _driver.FindElements(
-                By.CssSelector("[data-testid='ad-description-text']")
-            )
-            .FirstOrDefault()
-            ?.Text
-            .Trim();
+        string? description = null;
+
+        try
+        {
+            var descriptionSelectors = new[]
+            {
+                "[data-testid='ad_description']",
+                "[data-testid='ad-description-section']",
+                "[data-testid='ad-description-text']",
+                "[data-testid='textContainer']"
+            };
+
+            wait.Until(driver => descriptionSelectors.Any(selector =>
+                driver.FindElements(By.CssSelector(selector))
+                    .Any(element => !string.IsNullOrWhiteSpace(GetElementText(element)))));
+
+            foreach (var selector in descriptionSelectors)
+            {
+                var element = _driver.FindElements(By.CssSelector(selector))
+                    .FirstOrDefault(item =>
+                        !string.IsNullOrWhiteSpace(GetElementText(item)));
+
+                if (element is null)
+                {
+                    continue;
+                }
+
+                description = GetElementText(element)
+                    .Replace("ОПИС", string.Empty)
+                    .Replace("Докладніше", string.Empty)
+                    .Trim();
+
+                global::System.Console.WriteLine(
+                    $"Description extracted: {description.Length} chars");
+
+                break;
+            }
+        }
+        catch (WebDriverTimeoutException)
+        {
+            global::System.Console.WriteLine(
+                "Description was not available.");
+        }
 
         var authorName = _driver.FindElements(
                 By.CssSelector("[data-testid='user-profile-user-name']")
@@ -53,6 +90,15 @@ public sealed class OlxDetailPage
             AuthorName = authorName,
             Phone = null
         };
+    }
+
+    private string GetElementText(IWebElement element)
+    {
+        var text = ((IJavaScriptExecutor)_driver).ExecuteScript(
+            "return arguments[0].innerText || arguments[0].textContent || '';",
+            element) as string;
+
+        return text?.Trim() ?? string.Empty;
     }
 
     private static string ExtractId(string url)
